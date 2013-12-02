@@ -1,3 +1,5 @@
+#include <stdlib.h>     /* malloc, free, rand */
+#include <stdio.h>
 #include <string.h>
 #include <iostream>
 #include <fstream>
@@ -13,16 +15,14 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
 	std::map<std::string, int> key_list;
 	std::map<std::string,int>::iterator it_key_list;
 	
-	//Загрузка файлов в массив:
-	NumericVector xa(10);//(fnames); 
-	//std::string *files2 = new std::string[cx.size()];
-	/*
-        for (int i=0; i<cx.size(); i++) 
+	Rcpp::CharacterVector cx(fnames); 
+	std::string *files = new std::string[cx.size()];
+	int num_files = cx.size();
+	for (int i=0; i<cx.size(); i++) 
         {  
-      		files2[i] = cx[i];  
-    	} */
-	/*
-	//Загрузка ключей в словарь для последующего быстрого поиска:
+      		files[i] = cx[i];  
+    	} 
+	
 	cx = Rcpp::CharacterVector(ks);  
 	std::string *keys = new std::string[cx.size()];
     	for (int i=0; i<cx.size(); i++) 
@@ -30,8 +30,8 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
       		key_list[std::string(cx[i])] = 0;  
 		keys[i] = cx[i];
     	} 
-	*/
 	
+	/*
 	key_list["CCTGTG"] = 0; key_list["CTGCGA"] = 0; key_list["GAGGGA"] = 0; key_list["CATAGA"] = 0; key_list["GATCCA"] = 0;
 	key_list["CGTTAA"] = 0; key_list["ACTGAT"] = 0; key_list["AACAAC"] = 0; key_list["GTACCG"] = 0; key_list["ATCGGG"] = 0;
 	key_list["CATCAG"] = 0; key_list["AGTCAC"] = 0; key_list["GCACAC"] = 0; key_list["TCGTCA"] = 0; key_list["TCCACG"] = 0;
@@ -39,41 +39,41 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
 	key_list["ACCAGT"] = 0; key_list["CTAGGC"] = 0; key_list["TCACGG"] = 0; key_list["TTCCCA"] = 0;
 	
 	std::string keys[] = {"CCTGTG", "CTGCGA", "GAGGGA", "CATAGA", "GATCCA", "CGTTAA", "ACTGAT", "AACAAC", "GTACCG", "ATCGGG", "CATCAG", "AGTCAC", "GCACAC", "TCGTCA", "TCCACG", "TTCGAC", "ATAGTT", "GGTAAG", "GGGATT", "ACCTAA", "ACCAGT", "CTAGGC", "TCACGG", "TTCCCA"};
-  ;
-	std::string files[] = {"first4k.fastq"};
+	*/
+	//char *files[] = {"first4k.fastq"};
 
 	std::map<std::string, std::map<std::string, int> > RS_Counts;
 	std::map<std::string, std::map<std::string, int> >::iterator it_RS_Counts;
 
 	
-	int num_files = 1;
+	
 	unsigned long read_counter = 0;
-
+	
 	for(int f=0; f < num_files; ++f) {
 		int ii = 0;
         	std::string line;
-        	std::fstream in(files[f]);
+        	std::fstream in(files[f].c_str());
         	std::vector<std::string> record_block;
-
+		
 	        std::cout << "Processing files: " << files[f] << "\n";
 	        
         	while ( getline(in,line) )
         	{
-                	/*Read ID*/
+                	//Read ID
                 	if(ii==0) 
                 	{
                 	    record_block.push_back(line); 
                             ii++;
                 	    continue;
                 	}
-                	/*DNA string*/
+                	//DNA string
                 	if(ii==1) 
                 	{
-                	    record_block.push_back(line); /*DNA string*/
+                	    record_block.push_back(line);
                 	    ii++;
                 	    continue;
                 	}
-                	/*a symbol "+"*/
+                	//a symbol "+"
                 	if(ii==2) 
                 	{
                 	     record_block.push_back(line);
@@ -121,7 +121,7 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
                 	}	
 		}
 	}
-
+	
 	std::vector<std::string> rad_sites;
 	//Выводим на печать и в файл:
 	for(it_RS_Counts = RS_Counts.begin(); it_RS_Counts != RS_Counts.end(); it_RS_Counts++) {
@@ -137,7 +137,7 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
 	
 	std::cout << "Records processed: " << read_counter << std::endl;
 
-	free(files);
+	//free(files);
 	
 	return Rcpp::wrap( rad_sites );
 }
