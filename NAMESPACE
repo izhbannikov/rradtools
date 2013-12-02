@@ -1,1 +1,7 @@
 exportPattern("^[[:alpha:]]+")
+# Import required packages
+# none so far 
+# Load dynamic libraries (shared object files)
+useDynLib(rradtools)
+# Export functions defined in R code
+export("build_radsites")

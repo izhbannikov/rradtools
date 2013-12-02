@@ -3,7 +3,7 @@ Type: Package
 Title: What the package does (short line)
 Version: 1.0
 Date: 2013-11-26
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Author: I.Y. Zhbannikov
+Maintainer: I.Y. Zhbannikov <yourfault@somewhere.net>
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
