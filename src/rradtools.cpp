@@ -31,17 +31,6 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
 		keys[i] = cx[i];
     	} 
 	
-	/*
-	key_list["CCTGTG"] = 0; key_list["CTGCGA"] = 0; key_list["GAGGGA"] = 0; key_list["CATAGA"] = 0; key_list["GATCCA"] = 0;
-	key_list["CGTTAA"] = 0; key_list["ACTGAT"] = 0; key_list["AACAAC"] = 0; key_list["GTACCG"] = 0; key_list["ATCGGG"] = 0;
-	key_list["CATCAG"] = 0; key_list["AGTCAC"] = 0; key_list["GCACAC"] = 0; key_list["TCGTCA"] = 0; key_list["TCCACG"] = 0;
-	key_list["TTCGAC"] = 0; key_list["ATAGTT"] = 0; key_list["GGTAAG"] = 0; key_list["GGGATT"] = 0; key_list["ACCTAA"] = 0;
-	key_list["ACCAGT"] = 0; key_list["CTAGGC"] = 0; key_list["TCACGG"] = 0; key_list["TTCCCA"] = 0;
-	
-	std::string keys[] = {"CCTGTG", "CTGCGA", "GAGGGA", "CATAGA", "GATCCA", "CGTTAA", "ACTGAT", "AACAAC", "GTACCG", "ATCGGG", "CATCAG", "AGTCAC", "GCACAC", "TCGTCA", "TCCACG", "TTCGAC", "ATAGTT", "GGTAAG", "GGGATT", "ACCTAA", "ACCAGT", "CTAGGC", "TCACGG", "TTCCCA"};
-	*/
-	//char *files[] = {"first4k.fastq"};
-
 	std::map<std::string, std::map<std::string, int> > RS_Counts;
 	std::map<std::string, std::map<std::string, int> >::iterator it_RS_Counts;
 
@@ -139,5 +128,5 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
 
 	//free(files);
 	
-	return Rcpp::wrap( rad_sites );
+	return Rcpp::wrap( RS_Counts );
 }
