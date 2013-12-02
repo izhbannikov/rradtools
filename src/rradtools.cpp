@@ -101,7 +101,7 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
 
 			     record_block.clear();
 
-			     if( read_counter % 100000 == 0 ) 
+			     if( (read_counter > 0) && (read_counter % 100000 == 0 ) )
 			     {
         		    	std::cout << "Record: " << read_counter << std::endl;
 			     }
@@ -111,6 +111,7 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
 		}
 	}
 	
+	/*
 	std::vector<std::string> rad_sites;
 	//Выводим на печать и в файл:
 	for(it_RS_Counts = RS_Counts.begin(); it_RS_Counts != RS_Counts.end(); it_RS_Counts++) {
@@ -123,10 +124,11 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
 			std::cout << (*it_RS_Counts_keys).second << std::endl;
 		}
 	}
-	
+	*/
 	std::cout << "Records processed: " << read_counter << std::endl;
 
 	//free(files);
+	//free(keys);
 	
 	return Rcpp::wrap( RS_Counts );
 }
