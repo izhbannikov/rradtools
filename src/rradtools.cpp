@@ -16,11 +16,10 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
 	std::map<std::string,int>::iterator it_key_list;
 	
 	Rcpp::CharacterVector cx(fnames); 
-	std::string *files = new std::string[cx.size()];
-	int num_files = cx.size();
+	std::vector<char*> files;
 	for (int i=0; i<cx.size(); i++) 
-        {  
-      		files[i] = cx[i];  
+        {
+		files.push_back(cx[i]);  
     	} 
 	
 	cx = Rcpp::CharacterVector(ks);  
@@ -38,10 +37,10 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
 	
 	unsigned long read_counter = 0;
 	
-	for(int f=0; f < num_files; ++f) {
+	for(int f=0; f < files.size(); ++f) {
 		int ii = 0;
         	std::string line;
-        	std::fstream in(files[f].c_str());
+        	std::ifstream in(files[f]);
         	std::vector<std::string> record_block;
 		
 	        std::cout << "Processing files: " << files[f] << "\n";
