@@ -21,7 +21,7 @@ int Hamming(std::string s1, std::string s2) {
 	return dist;
 }
 
-RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks) 
+RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks, SEXP merge_sites) 
 {
 	std::map<std::string, int> key_list;
 	std::map<std::string,int>::iterator it_key_list;
@@ -136,22 +136,25 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
 	}
 	*/
 	std::cout << "Records processed: " << read_counter << std::endl;
-
-	std::vector< std::map<std::string, std::map<std::string, int> >  > rad_sites;
-	for(it_RS_Counts = RS_Counts.begin(); it_RS_Counts != RS_Counts.end(); it_RS_Counts++) {
-		std::map<std::string, std::map<std::string, int> > site;
-		site[it_RS_Counts->first] = it_RS_Counts->second;
+	
+	if(as<bool>(merge_sites)) {
+		std::vector< std::map<std::string, std::map<std::string, int> >  > rad_sites;
+		for(it_RS_Counts = RS_Counts.begin(); it_RS_Counts != RS_Counts.end(); it_RS_Counts++) {
+			std::map<std::string, std::map<std::string, int> > site;
+			site[it_RS_Counts->first] = it_RS_Counts->second;
 		
-		std::map<std::string, std::map<std::string, int> >::iterator it_RS_Counts_2;
+			std::map<std::string, std::map<std::string, int> >::iterator it_RS_Counts_2;
 
-		for(it_RS_Counts_2 = it_RS_Counts; it_RS_Counts_2 != RS_Counts.end(); it_RS_Counts_2++) {		
-			if( Hamming( it_RS_Counts->first, it_RS_Counts_2->first ) < 4 ) {
-				site[it_RS_Counts_2->first] = it_RS_Counts_2->second;
+			for(it_RS_Counts_2 = it_RS_Counts; it_RS_Counts_2 != RS_Counts.end(); it_RS_Counts_2++) {		
+				if( Hamming( it_RS_Counts->first, it_RS_Counts_2->first ) < 4 ) {
+					site[it_RS_Counts_2->first] = it_RS_Counts_2->second;
+				}
 			}
+			rad_sites.push_back(site);
 		}
-		rad_sites.push_back(site);
+		return Rcpp::wrap( rad_sites );
 	}
 	
-	return Rcpp::wrap( rad_sites );
+	return Rcpp::wrap( RS_Counts );
 }
 
