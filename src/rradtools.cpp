@@ -233,64 +233,23 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks, SEXP merge_sites, SEXP corre
 		keys[i] = cx[i];
     	} 
 
-	std::vector<std::string> reads;
-	if(as<bool>(correction)) {
-		reads = CorrectReads(files);
-	}
-	
 	std::map<std::string, std::map<std::string, int> > RS_Counts;
 	std::map<std::string, std::map<std::string, int> >::iterator it_RS_Counts;
 
-	
-	
 	unsigned long read_counter = 0;
-	
-	for(int f=0; f < files.size(); ++f) {
-		int ii = 0;
-        	std::string line;
-        	std::ifstream in(files[f]);
-        	std::vector<std::string> record_block;
-		
-	        std::cout << "Processing files: " << files[f] << "\n";
-	        
-        	while ( getline(in,line) )
-        	{
-                	//Read ID
-                	if(ii==0) 
-                	{
-                	    record_block.push_back(line); 
-                            ii++;
-                	    continue;
-                	}
-                	//DNA string
-                	if(ii==1) 
-                	{
-                	    record_block.push_back(line);
-			    
-                	    ii++;
-                	    continue;
-                	}
-                	//a symbol "+"
-                	if(ii==2) 
-                	{
-                	     record_block.push_back(line);
-                	     ii++;
-                	     continue;
-                	}
-                	if(ii==3) 
-                	{
-                	     ii=0;
-           
-                	     record_block.push_back(line); //Сохраняем качества чтения нуклеотидов
-                	     
-			     std::string bc = record_block[1].substr(0,6);
-			     std::string rs = record_block[1].substr(6,6);
+
+	if(as<bool>(correction)) {
+		std::vector<std::string> reads;		
+		reads = CorrectReads(files);
+		for(unsigned long i=0; i < reads.size(); ++i) {
+			std::string bc = reads[i].substr(0,6);
+			std::string rs = reads[i].substr(6,6);
 			     
-			     std::string rad = record_block[1].substr(12,rad_length);
+			std::string rad = reads[i].substr(12,rad_length);
 			     
-			     it_key_list = key_list.find(bc);
-			     if( (it_key_list != key_list.end() ) && (rs == "TGCAGG") ) 
-			     {
+			it_key_list = key_list.find(bc);
+			if( (it_key_list != key_list.end() ) && (rs == "TGCAGG") ) 
+			{
 				it_RS_Counts = RS_Counts.find(rad);
 				if( it_RS_Counts == RS_Counts.end() ) 
 				{
@@ -302,20 +261,92 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks, SEXP merge_sites, SEXP corre
 						RS_Counts[rad][keys[j]] = 0;
 					}
 				}
-				
+					
 				RS_Counts[rad][bc] += 1;
-				
-			     }
+					
+			}
 
-			     record_block.clear();
+			if( (read_counter > 0) && (read_counter % 100000 == 0 ) )
+			{
+        			std::cout << "Record: " << read_counter << std::endl;
+			}
+			read_counter++;
+		}
 
-			     if( (read_counter > 0) && (read_counter % 100000 == 0 ) )
-			     {
-        		    	std::cout << "Record: " << read_counter << std::endl;
-			     }
-			     read_counter++;
+	} else {
+	
+		for(int f=0; f < files.size(); ++f) {
+			int ii = 0;
+        		std::string line;
+        		std::ifstream in(files[f]);
+        		std::vector<std::string> record_block;
+		
+		        std::cout << "Processing files: " << files[f] << "\n";
+	        
+        		while ( getline(in,line) )
+        		{
+        	        	//Read ID
+        	        	if(ii==0) 
+        	        	{
+        	        	    record_block.push_back(line); 
+        	                    ii++;
+        	        	    continue;
+        	        	}
+        	        	//DNA string
+        	        	if(ii==1) 
+        	        	{
+        	        	    record_block.push_back(line);
+				    
+        	        	    ii++;
+        	        	    continue;
+        	        	}
+        	        	//a symbol "+"
+        	        	if(ii==2) 
+        	        	{
+        	        	     record_block.push_back(line);
+        	        	     ii++;
+        	        	     continue;
+        	        	}
+        	        	if(ii==3) 
+        	        	{
+        	        	     ii=0;
+           
+        	        	     record_block.push_back(line); //Сохраняем качества чтения нуклеотидов
                 	     
-                	}	
+				     std::string bc = record_block[1].substr(0,6);
+				     std::string rs = record_block[1].substr(6,6);
+			     
+				     std::string rad = record_block[1].substr(12,rad_length);
+			     
+				     it_key_list = key_list.find(bc);
+				     if( (it_key_list != key_list.end() ) && (rs == "TGCAGG") ) 
+				     {
+					it_RS_Counts = RS_Counts.find(rad);
+					if( it_RS_Counts == RS_Counts.end() ) 
+					{
+						//Создаем новый словарь:
+						std::map<std::string, int> RS_Counts_keys;
+						RS_Counts[rad] = RS_Counts_keys;
+						for(int j=0; j<cx.size(); ++j) 
+						{
+							RS_Counts[rad][keys[j]] = 0;
+						}
+					}
+					
+					RS_Counts[rad][bc] += 1;
+					
+				     }
+
+				     record_block.clear();
+
+				     if( (read_counter > 0) && (read_counter % 100000 == 0 ) )
+				     {
+        			    	std::cout << "Record: " << read_counter << std::endl;
+				     }
+				     read_counter++;
+                	     
+        	        	}	
+			}
 		}
 	}
 	
