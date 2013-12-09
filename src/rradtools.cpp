@@ -9,6 +9,17 @@
 
 using namespace Rcpp;
 
+unsigned int rad_length = 20;
+
+int Hamming(std::string s1, std::string s2) {
+	int dist = 0;
+	for(int i=0; i < rad_length; ++i) {
+		if(s1[i] != s2[i]) 
+			dist += 1;
+	}
+	
+	return dist;
+}
 
 RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks) 
 {
@@ -126,8 +137,21 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks)
 	*/
 	std::cout << "Records processed: " << read_counter << std::endl;
 
-	//free(files);
-	//free(keys);
+	std::vector< std::map<std::string, std::map<std::string, int> >  > rad_sites;
+	for(it_RS_Counts = RS_Counts.begin(); it_RS_Counts != RS_Counts.end(); it_RS_Counts++) {
+		std::map<std::string, std::map<std::string, int> > site;
+		site[it_RS_Counts->first] = it_RS_Counts->second;
+		
+		std::map<std::string, std::map<std::string, int> >::iterator it_RS_Counts_2;
+
+		for(it_RS_Counts_2 = it_RS_Counts; it_RS_Counts_2 != RS_Counts.end(); it_RS_Counts_2++) {		
+			if( Hamming( it_RS_Counts->first, it_RS_Counts_2->first ) < 4 ) {
+				site[it_RS_Counts_2->first] = it_RS_Counts_2->second;
+			}
+		}
+		rad_sites.push_back(site);
+	}
 	
-	return Rcpp::wrap( RS_Counts );
+	return Rcpp::wrap( rad_sites );
 }
+
