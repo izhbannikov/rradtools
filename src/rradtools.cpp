@@ -9,11 +9,9 @@
 
 using namespace Rcpp;
 
-unsigned int rad_length = 50;
-
-int Hamming(std::string s1, std::string s2) {
+int Hamming(std::string s1, std::string s2, int rad_site_length) {
 	int dist = 0;
-	for(int i=0; i < rad_length; ++i) {
+	for(int i=0; i < rad_site_length; ++i) {
 		if(s1[i] != s2[i]) 
 			dist += 1;
 	}
@@ -41,7 +39,7 @@ std::vector<char> GetBases(char b) {
 	
 }
 
-std::vector<std::string> CorrectReads(std::vector<char*> files) {
+std::vector<std::string> CorrectReads(std::vector<char*> files, int rad_site_length) {
 	std::vector<std::string> corrected_reads;
 	
 	std::map<std::string, std::map<int, char> > reads;
@@ -81,7 +79,7 @@ std::vector<std::string> CorrectReads(std::vector<char*> files) {
                 	if(ii==1) 
                 	{
                 	    //record_block.push_back(line.substr(12,line.length()-12));
-			    record_block.push_back(line.substr(12,rad_length));
+			    record_block.push_back(line.substr(12,rad_site_length));
 			    read_data[record_block[0]] = line;
                 	    ii++;
                 	    continue;
@@ -99,7 +97,7 @@ std::vector<std::string> CorrectReads(std::vector<char*> files) {
            
                 	     record_block.push_back(line); //Сохраняем качества чтения нуклеотидов
                 	     
-			     for(int i = 12; i< 12+rad_length- k + 1; ++i) {
+			     for(int i = 12; i< 12+rad_site_length- k + 1; ++i) {
 
 				kmers[ record_block[1].substr(i,k) ][ record_block[0] ][ i ] += 1;
 				
@@ -201,7 +199,7 @@ std::vector<std::string> CorrectReads(std::vector<char*> files) {
 				it_read_data->second[(*it_corr).first] = (*it_corr).second;
 			}
 		}
-		std::cout << it_read_data->second << "\n";	     			     
+		//std::cout << it_read_data->second << "\n";	     			     
 		corrected_reads.push_back(it_read_data->second);	     
 		
 	}
@@ -212,7 +210,7 @@ std::vector<std::string> CorrectReads(std::vector<char*> files) {
 	
 }
 
-RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks, SEXP merge_sites, SEXP correction) 
+RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks, SEXP merge_sites, SEXP correction, SEXP rad_site_length, SEXP max_distance) 
 {
 	
 	std::map<std::string, int> key_list;
@@ -240,12 +238,12 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks, SEXP merge_sites, SEXP corre
 
 	if(as<bool>(correction)) {
 		std::vector<std::string> reads;		
-		reads = CorrectReads(files);
+		reads = CorrectReads(files,as<int>(rad_site_length));
 		for(unsigned long i=0; i < reads.size(); ++i) {
 			std::string bc = reads[i].substr(0,6);
 			std::string rs = reads[i].substr(6,6);
 			     
-			std::string rad = reads[i].substr(12,rad_length);
+			std::string rad = reads[i].substr(12,as<int>(rad_site_length));
 			     
 			it_key_list = key_list.find(bc);
 			if( (it_key_list != key_list.end() ) && (rs == "TGCAGG") ) 
@@ -316,7 +314,7 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks, SEXP merge_sites, SEXP corre
 				     std::string bc = record_block[1].substr(0,6);
 				     std::string rs = record_block[1].substr(6,6);
 			     
-				     std::string rad = record_block[1].substr(12,rad_length);
+				     std::string rad = record_block[1].substr(12,as<int>(rad_site_length));
 			     
 				     it_key_list = key_list.find(bc);
 				     if( (it_key_list != key_list.end() ) && (rs == "TGCAGG") ) 
@@ -375,7 +373,7 @@ RcppExport SEXP BuildRadSites(SEXP fnames, SEXP ks, SEXP merge_sites, SEXP corre
 			std::map<std::string, std::map<std::string, int> >::iterator it_RS_Counts_2;
 
 			for(it_RS_Counts_2 = it_RS_Counts; it_RS_Counts_2 != RS_Counts.end(); it_RS_Counts_2++) {		
-				if( Hamming( it_RS_Counts->first, it_RS_Counts_2->first ) < 4 ) {
+				if( Hamming( it_RS_Counts->first, it_RS_Counts_2->first, as<int>(rad_site_length) ) <= as<int>(max_distance) ) {
 					site[it_RS_Counts_2->first] = it_RS_Counts_2->second;
 				}
 			}

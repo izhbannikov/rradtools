@@ -1,7 +1,7 @@
 #rradtools.R
-build_radsites <- function(fnames,keys,astable=T,merge_sites=T,correction=F) 
+build_radsites <- function(fnames,keys,astable=T,merge_sites=T,correction=F,rad_site_length=50,max_distance=3) 
 {
-    ans <- .Call("BuildRadSites",fnames,keys,merge_sites,correction)
+    ans <- .Call("BuildRadSites",fnames,keys,merge_sites,correction,rad_site_length,max_distance)
     
     
     if(astable & merge_sites) {
